@@ -26,5 +26,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-x
       - run: npm ci 
-      - run: npm run format:check
+      - run: npm install -g @angular/cli
       - run: npm test -- --coverage
+      - name: Upload test --coverage
+        uses: actions/upload-artifact@v1
+        with:
+          name: code-coverage
+          path: coverage
