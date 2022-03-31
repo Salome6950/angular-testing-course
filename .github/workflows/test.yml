@@ -14,16 +14,22 @@ jobs:
         node-version: [14.x]
     steps:
       - uses: actions/checkout@v2
-      - name: Use NodeJS ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-      - run: npm ci 
-      - run: npm install -g @angular/cli
-      - run: npm test 
-      - name: Upload test coverage
-        uses: actions/upload-artifact@v1
-        with:
-          name: code-coverage
-          path: coverage
+      - name: Cache node-modules
+        uses: actions/cache@v1
+        with: 
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Use NodeJS
+        uses: actions/setup-node@v1
+        with: 
+          node-version: "14.x"
+      - run: npm CI
+      - run: npm run format:check
+      - run: npm test -- --coverage
+        env:
+          CI: true
+      - name: Build Projects
+      - if: github.event_name == 'push'
+      - run: npm run build 
